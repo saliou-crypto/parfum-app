@@ -399,3 +399,26 @@ body {
   font-size: 14px;
   cursor: pointer;
 }
+/* ===== RESPONSIVE & ANTI-ZOOM ===== */
+
+/* Empêcher le zoom sur les inputs iOS */
+input, select, textarea {
+  font-size: 16px !important;
+}
+
+/* Empêcher le zoom double-tap */
+* {
+  touch-action: manipulation;
+}
+
+/* Eviter le débordement horizontal */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Images responsive */
+img {
+  max-width: 100%;
+  height: auto;
+}
