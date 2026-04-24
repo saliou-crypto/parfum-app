@@ -369,3 +369,9 @@ body {
   font-size: 14px;
   cursor: pointer;
 }
+.btn-modifier {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
