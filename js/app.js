@@ -16,6 +16,14 @@ function saveVentes(ventes) {
   localStorage.setItem('ventes', JSON.stringify(ventes));
 }
 
+function getFactures() {
+  return JSON.parse(localStorage.getItem('factures')) || [];
+}
+
+function saveFactures(factures) {
+  localStorage.setItem('factures', JSON.stringify(factures));
+}
+
 function formaterDate(timestamp) {
   const d = new Date(timestamp);
   return d.toLocaleDateString('fr-FR', {
@@ -121,6 +129,8 @@ function afficherProduits() {
 
 // ========== VENTES ==========
 
+let panier = [];
+
 function chargerSelectProduits() {
   const select = document.getElementById('produit-vente');
   if (!select) return;
@@ -130,86 +140,146 @@ function chargerSelectProduits() {
   produits.forEach(p => {
     select.innerHTML += `<option value="${p.id}">${p.nom} — ${p.prix.toLocaleString()} F CFA (stock: ${p.stock})</option>`;
   });
-
-  select.addEventListener('change', calculerTotal);
-  document.getElementById('quantite-vente')?.addEventListener('input', calculerTotal);
 }
 
-function calculerTotal() {
-  const selectEl = document.getElementById('produit-vente');
-  const qte = parseInt(document.getElementById('quantite-vente').value) || 0;
-  const produits = getProduits();
-  const produit = produits.find(p => p.id == selectEl.value);
-  const total = produit ? produit.prix * qte : 0;
-  document.getElementById('total-vente').textContent = total.toLocaleString() + ' F CFA';
-}
-
-function enregistrerVente() {
+function ajouterAuPanier() {
   const selectEl = document.getElementById('produit-vente');
   const qte = parseInt(document.getElementById('quantite-vente').value);
-  const client = document.getElementById('client-vente').value.trim();
 
   if (!selectEl.value || !qte || qte <= 0) {
-    alert('Choisis un produit et une quantité valide !');
+    alert('Choisis un produit et une quantité !');
     return;
   }
 
-  let produits = getProduits();
+  const produits = getProduits();
   const produit = produits.find(p => p.id == selectEl.value);
-
   if (!produit) return;
 
-  if (qte > produit.stock) {
-    alert(`Stock insuffisant ! Il reste seulement ${produit.stock} unité(s).`);
+  const dejaAuPanier = panier.filter(i => i.produitId == produit.id)
+    .reduce((s, i) => s + i.quantite, 0);
+
+  if (qte + dejaAuPanier > produit.stock) {
+    alert(`Stock insuffisant ! Il reste seulement ${produit.stock - dejaAuPanier} unité(s) disponible(s).`);
     return;
   }
 
-  produit.stock -= qte;
+  const existant = panier.find(i => i.produitId == produit.id);
+  if (existant) {
+    existant.quantite += qte;
+    existant.total = existant.prix * existant.quantite;
+  } else {
+    panier.push({
+      produitId: produit.id,
+      produitNom: produit.nom,
+      prix: produit.prix,
+      quantite: qte,
+      total: produit.prix * qte
+    });
+  }
+
+  selectEl.value = '';
+  document.getElementById('quantite-vente').value = '';
+  afficherPanier();
+}
+
+function afficherPanier() {
+  const section = document.getElementById('panier-section');
+  const liste = document.getElementById('panier-liste');
+  if (!section || !liste) return;
+
+  if (panier.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = 'block';
+  liste.innerHTML = panier.map((item, index) => `
+    <div class="vente-item" style="margin-bottom:8px;">
+      <div class="vente-info">
+        <p>${item.produitNom} x${item.quantite}</p>
+        <p>${item.prix.toLocaleString()} F CFA / unité</p>
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+        <span class="vente-montant">${item.total.toLocaleString()} F</span>
+        <button onclick="retirerDuPanier(${index})" style="background:none; border:none; font-size:14px; cursor:pointer; color:#e11d48;">✕ Retirer</button>
+      </div>
+    </div>
+  `).join('');
+
+  const total = panier.reduce((s, i) => s + i.total, 0);
+  document.getElementById('total-panier').textContent = total.toLocaleString() + ' F CFA';
+}
+
+function retirerDuPanier(index) {
+  panier.splice(index, 1);
+  afficherPanier();
+}
+
+function viderPanier() {
+  panier = [];
+  afficherPanier();
+}
+
+function validerVente() {
+  if (panier.length === 0) {
+    alert('Le panier est vide !');
+    return;
+  }
+
+  const client = document.getElementById('client-vente').value.trim() || 'Client anonyme';
+
+  let produits = getProduits();
+  for (const item of panier) {
+    const produit = produits.find(p => p.id === item.produitId);
+    if (!produit || item.quantite > produit.stock) {
+      alert(`Stock insuffisant pour ${item.produitNom} !`);
+      return;
+    }
+  }
+
+  for (const item of panier) {
+    const produit = produits.find(p => p.id === item.produitId);
+    produit.stock -= item.quantite;
+  }
   saveProduits(produits);
 
+  const totalGeneral = panier.reduce((s, i) => s + i.total, 0);
   const ventes = getVentes();
   ventes.unshift({
     id: Date.now(),
-    produitId: produit.id,
-    produitNom: produit.nom,
-    prix: produit.prix,
-    quantite: qte,
-    total: produit.prix * qte,
-    client: client || 'Client anonyme',
+    client,
+    articles: [...panier],
+    total: totalGeneral,
     date: Date.now()
   });
   saveVentes(ventes);
 
   alert('Vente enregistrée ! ✅');
 
-  selectEl.value = '';
-  document.getElementById('quantite-vente').value = '';
+  panier = [];
   document.getElementById('client-vente').value = '';
-  document.getElementById('total-vente').textContent = '0 F CFA';
-
+  afficherPanier();
   afficherHistoriqueVentes();
   chargerSelectProduits();
+  afficherDernieresVentes();
+  calculerStats();
 }
 
 function supprimerVente(id) {
   if (!confirm('Supprimer cette vente et sa facture ?')) return;
 
-  // Récupérer la vente AVANT de la supprimer pour remettre le stock
   const vente = getVentes().find(v => v.id === id);
-
   if (vente) {
     let produits = getProduits();
-    const produit = produits.find(p => p.id === vente.produitId);
-    if (produit) {
-      produit.stock += vente.quantite;
-      saveProduits(produits);
+    const articles = vente.articles || [{ produitId: vente.produitId, quantite: vente.quantite }];
+    for (const item of articles) {
+      const produit = produits.find(p => p.id === item.produitId);
+      if (produit) produit.stock += item.quantite;
     }
+    saveProduits(produits);
   }
 
-  // Supprimer la vente
   saveVentes(getVentes().filter(v => v.id !== id));
-
-  // Supprimer la facture liée
   saveFactures(getFactures().filter(f => f.venteId !== id));
 
   afficherHistoriqueVentes();
@@ -231,7 +301,7 @@ function afficherHistoriqueVentes() {
   liste.innerHTML = ventes.map(v => `
     <div class="vente-item">
       <div class="vente-info" onclick="genererPDFDepuisVente(${v.id})" style="cursor:pointer; flex:1;">
-        <p>${v.produitNom} x${v.quantite}</p>
+        <p>${v.articles ? v.articles.map(a => a.produitNom).join(', ') : v.produitNom}</p>
         <p>${v.client} · ${formaterDate(v.date)}</p>
       </div>
       <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
@@ -257,7 +327,7 @@ function afficherDernieresVentes() {
   liste.innerHTML = `<div class="ventes-liste">${ventes.map(v => `
     <div class="vente-item">
       <div class="vente-info">
-        <p>${v.produitNom} x${v.quantite}</p>
+        <p>${v.articles ? v.articles.map(a => a.produitNom).join(', ') : v.produitNom}</p>
         <p>${v.client} · ${formaterDate(v.date)}</p>
       </div>
       <span class="vente-montant">+${v.total.toLocaleString()} F</span>
@@ -292,22 +362,19 @@ function calculerStats() {
 
 let factureEnCours = null;
 
-function getFactures() {
-  return JSON.parse(localStorage.getItem('factures')) || [];
-}
-
-function saveFactures(factures) {
-  localStorage.setItem('factures', JSON.stringify(factures));
-}
-
 function genererPDFDepuisVente(id) {
   const vente = getVentes().find(v => v.id === id);
   if (!vente) return;
 
   const numero = 'FAC-' + vente.id.toString().slice(-6);
   const date = new Date(vente.date).toLocaleDateString('fr-FR');
+  const articles = vente.articles || [{
+    produitNom: vente.produitNom,
+    prix: vente.prix,
+    quantite: vente.quantite,
+    total: vente.total
+  }];
 
-  // Sauvegarder dans l'historique si pas déjà présent
   const factures = getFactures();
   const existe = factures.find(f => f.venteId === vente.id);
   if (!existe) {
@@ -316,28 +383,26 @@ function genererPDFDepuisVente(id) {
       venteId: vente.id,
       numero,
       client: vente.client,
-      produitNom: vente.produitNom,
-      prix: vente.prix,
-      quantite: vente.quantite,
+      produitNom: articles.map(a => a.produitNom).join(', '),
       total: vente.total,
       date: vente.date
     });
     saveFactures(factures);
   }
 
-  factureEnCours = { vente, numero, date };
+  factureEnCours = { vente, articles, numero, date };
 
   document.getElementById('modal-numero').textContent = 'N° ' + numero;
   document.getElementById('modal-date').textContent = 'Date : ' + date;
   document.getElementById('modal-client').textContent = 'Client : ' + vente.client;
-  document.getElementById('modal-lignes').innerHTML = `
+  document.getElementById('modal-lignes').innerHTML = articles.map(a => `
     <tr>
-      <td>${vente.produitNom}</td>
-      <td>${vente.quantite}</td>
-      <td>${vente.prix.toLocaleString()} F</td>
-      <td>${vente.total.toLocaleString()} F</td>
+      <td>${a.produitNom}</td>
+      <td>${a.quantite}</td>
+      <td>${a.prix.toLocaleString()} F</td>
+      <td>${a.total.toLocaleString()} F</td>
     </tr>
-  `;
+  `).join('');
   document.getElementById('modal-total').textContent = vente.total.toLocaleString() + ' F CFA';
 
   document.getElementById('modal-overlay').style.display = 'flex';
@@ -351,7 +416,7 @@ function fermerModal() {
 
 function telechargerDepuisModal() {
   if (!factureEnCours) return;
-  const { vente, numero, date } = factureEnCours;
+  const { vente, articles, numero, date } = factureEnCours;
 
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
@@ -389,18 +454,25 @@ function telechargerDepuisModal() {
   doc.text('Total', 172, 84);
 
   doc.setFont('helvetica', 'normal');
-  doc.setFillColor(252, 232, 255);
-  doc.rect(14, 91, 182, 8, 'F');
-  doc.text(vente.produitNom, 16, 97);
-  doc.text(String(vente.quantite), 112, 97);
-  doc.text(vente.prix.toLocaleString() + ' F', 130, 97);
-  doc.text(vente.total.toLocaleString() + ' F', 172, 97);
+  let y = 96;
+  articles.forEach((a, i) => {
+    if (i % 2 === 0) {
+      doc.setFillColor(252, 232, 255);
+      doc.rect(14, y - 5, 182, 8, 'F');
+    }
+    doc.text(a.produitNom, 16, y);
+    doc.text(String(a.quantite), 112, y);
+    doc.text(a.prix.toLocaleString() + ' F', 130, y);
+    doc.text(a.total.toLocaleString() + ' F', 172, y);
+    y += 10;
+  });
 
   doc.setLineWidth(0.5);
-  doc.line(14, 105, 196, 105);
+  doc.line(14, y, 196, y);
+  y += 8;
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(11);
-  doc.text('TOTAL : ' + vente.total.toLocaleString() + ' F CFA', 130, 113);
+  doc.text('TOTAL : ' + vente.total.toLocaleString() + ' F CFA', 130, y);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);

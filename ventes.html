@@ -17,19 +17,34 @@
 
   <!-- FORMULAIRE -->
   <div class="section">
-    <p class="section-titre">Détails de la vente</p>
+    <p class="section-titre">Informations client</p>
+    <div class="formulaire">
+      <input type="text" id="client-vente" placeholder="Nom du client (optionnel)" />
+    </div>
+  </div>
+
+  <!-- PANIER -->
+  <div class="section">
+    <p class="section-titre">Ajouter des produits</p>
     <div class="formulaire">
       <select id="produit-vente">
         <option value="">-- Choisir un parfum --</option>
       </select>
       <input type="number" id="quantite-vente" placeholder="Quantité" min="1" />
-      <input type="text" id="client-vente" placeholder="Nom du client (optionnel)" />
-      <div class="total-box">
-        <span>Total</span>
-        <span id="total-vente">0 F CFA</span>
-      </div>
-      <button onclick="enregistrerVente()">Enregistrer la vente</button>
+      <button onclick="ajouterAuPanier()">+ Ajouter au panier</button>
     </div>
+  </div>
+
+  <!-- APERCU PANIER -->
+  <div class="section" id="panier-section" style="display:none;">
+    <p class="section-titre">Panier</p>
+    <div id="panier-liste"></div>
+    <div class="total-box" style="margin-top:10px;">
+      <span>Total panier</span>
+      <span id="total-panier">0 F CFA</span>
+    </div>
+    <button class="btn-valider" onclick="validerVente()">✅ Valider la vente</button>
+    <button class="btn-vider" onclick="viderPanier()">🗑 Vider le panier</button>
   </div>
 
   <!-- HISTORIQUE -->
