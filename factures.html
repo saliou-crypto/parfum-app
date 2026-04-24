@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Factures</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <p class="bonjour">Générer une facture</p>
+    <h1 class="titre">Factures</h1>
+  </div>
+
+  <!-- FORMULAIRE FACTURE -->
+  <div class="section">
+    <p class="section-titre">Nouvelle facture</p>
+    <div class="formulaire">
+      <input type="text" id="facture-client" placeholder="Nom du client" />
+      <input type="text" id="facture-telephone" placeholder="Téléphone (optionnel)" />
+      <select id="facture-produit">
+        <option value="">-- Choisir un parfum --</option>
+      </select>
+      <input type="number" id="facture-quantite" placeholder="Quantité" min="1" />
+      <button onclick="ajouterLigneFacture()">+ Ajouter une ligne</button>
+    </div>
+  </div>
+
+  <!-- APERCU FACTURE -->
+  <div class="section" id="apercu-section" style="display:none">
+    <p class="section-titre">Aperçu</p>
+    <div class="facture-apercu">
+      <div class="facture-entete">
+        <h2>Parfums by Amy</h2>
+        <p id="facture-numero"></p>
+        <p id="facture-date"></p>
+      </div>
+      <p class="facture-client-nom" id="apercu-client"></p>
+      <table class="facture-table">
+        <thead>
+          <tr>
+            <th>Produit</th>
+            <th>Qté</th>
+            <th>Prix</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody id="facture-lignes"></tbody>
+      </table>
+      <div class="facture-total">
+        <span>Total</span>
+        <span id="facture-total-montant">0 F CFA</span>
+      </div>
+      <button class="btn-pdf" onclick="genererPDF()">📄 Télécharger PDF</button>
+      <button class="btn-reset" onclick="reinitialiserFacture()">🔄 Nouvelle facture</button>
+    </div>
+  </div>
+
+  <!-- HISTORIQUE FACTURES -->
+  <div class="section">
+    <p class="section-titre">Historique</p>
+    <div id="historique-factures">
+      <p class="vide">Aucune facture générée</p>
+    </div>
+  </div>
+
+  <!-- NAV BAS -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <span>🏠</span>
+      <span>Accueil</span>
+    </a>
+    <a href="produits.html" class="nav-item">
+      <span>📦</span>
+      <span>Produits</span>
+    </a>
+    <a href="ventes.html" class="nav-item">
+      <span>🛒</span>
+      <span>Ventes</span>
+    </a>
+    <a href="factures.html" class="nav-item active">
+      <span>🧾</span>
+      <span>Factures</span>
+    </a>
+  </nav>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

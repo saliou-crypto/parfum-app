@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ventes</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <p class="bonjour">Enregistrer une vente</p>
+    <h1 class="titre">Nouvelle Vente</h1>
+  </div>
+
+  <!-- FORMULAIRE -->
+  <div class="section">
+    <p class="section-titre">Détails de la vente</p>
+    <div class="formulaire">
+      <select id="produit-vente">
+        <option value="">-- Choisir un parfum --</option>
+      </select>
+      <input type="number" id="quantite-vente" placeholder="Quantité" min="1" />
+      <input type="text" id="client-vente" placeholder="Nom du client (optionnel)" />
+      <div class="total-box">
+        <span>Total</span>
+        <span id="total-vente">0 F CFA</span>
+      </div>
+      <button onclick="enregistrerVente()">Enregistrer la vente</button>
+    </div>
+  </div>
+
+  <!-- HISTORIQUE -->
+  <div class="section">
+    <p class="section-titre">Historique</p>
+    <div id="historique-ventes">
+      <p class="vide">Aucune vente enregistrée</p>
+    </div>
+  </div>
+
+  <!-- NAV BAS -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <span>🏠</span>
+      <span>Accueil</span>
+    </a>
+    <a href="produits.html" class="nav-item">
+      <span>📦</span>
+      <span>Produits</span>
+    </a>
+    <a href="ventes.html" class="nav-item active">
+      <span>🛒</span>
+      <span>Ventes</span>
+    </a>
+    <a href="factures.html" class="nav-item">
+      <span>🧾</span>
+      <span>Factures</span>
+    </a>
+  </nav>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

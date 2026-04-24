@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Parfums by Bousso</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <p class="bonjour">Bonjour Bousso👋</p>
+    <h1 class="titre">Parfums by Bousso</h1>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <p class="stat-label">Ventes du jour</p>
+        <p class="stat-value" id="ventes-jour">0 F</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Ce mois</p>
+        <p class="stat-value" id="ventes-mois">0 F</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIONS RAPIDES -->
+  <div class="section">
+    <p class="section-titre">Actions rapides</p>
+    <div class="actions-grid">
+      <a href="ventes.html" class="action-card">
+        <span class="action-icon">🛒</span>
+        <p class="action-name">Nouvelle vente</p>
+        <p class="action-sub">Enregistrer</p>
+      </a>
+      <a href="factures.html" class="action-card">
+        <span class="action-icon">🧾</span>
+        <p class="action-name">Facture PDF</p>
+        <p class="action-sub">Générer</p>
+      </a>
+      <a href="produits.html" class="action-card">
+        <span class="action-icon">📦</span>
+        <p class="action-name">Produits</p>
+        <p class="action-sub">Stock</p>
+      </a>
+      <a href="rapport.html" class="action-card">
+        <span class="action-icon">📊</span>
+        <p class="action-name">Rapport</p>
+        <p class="action-sub">Statistiques</p>
+      </a>
+    </div>
+  </div>
+
+  <!-- DERNIÈRES VENTES -->
+  <div class="section">
+    <p class="section-titre">Dernières ventes</p>
+    <div class="ventes-liste" id="dernières-ventes">
+      <p class="vide">Aucune vente enregistrée</p>
+    </div>
+  </div>
+
+  <!-- NAV BAS -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item active">
+      <span>🏠</span>
+      <span>Accueil</span>
+    </a>
+    <a href="produits.html" class="nav-item">
+      <span>📦</span>
+      <span>Produits</span>
+    </a>
+    <a href="ventes.html" class="nav-item">
+      <span>🛒</span>
+      <span>Ventes</span>
+    </a>
+    <a href="factures.html" class="nav-item">
+      <span>🧾</span>
+      <span>Factures</span>
+    </a>
+  </nav>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
