@@ -120,11 +120,9 @@ function enregistrerVente() {
     return;
   }
 
-  // Déduire du stock
   produit.stock -= qte;
   saveProduits(produits);
 
-  // Enregistrer la vente
   const ventes = getVentes();
   ventes.unshift({
     id: Date.now(),
@@ -140,7 +138,6 @@ function enregistrerVente() {
 
   alert('Vente enregistrée ! ✅');
 
-  // Reset
   selectEl.value = '';
   document.getElementById('quantite-vente').value = '';
   document.getElementById('client-vente').value = '';
@@ -217,18 +214,7 @@ function calculerStats() {
   venteMoisEl.textContent = totalMois.toLocaleString() + ' F';
 }
 
-// ========== INIT ==========
-
-document.addEventListener('DOMContentLoaded', () => {
-  afficherProduits();
-  afficherDernieresVentes();
-  afficherHistoriqueVentes();
-  afficherHistoriqueFactures();
-  calculerStats();
-  chargerSelectProduits();
-  chargerSelectFacture();
-});
-  // ========== FACTURES ==========
+// ========== FACTURES ==========
 
 let lignesFacture = [];
 
@@ -274,7 +260,6 @@ function ajouterLigneFacture() {
     total: produit.prix * qte
   });
 
-  // Reset champs produit
   selectEl.value = '';
   document.getElementById('facture-quantite').value = '';
 
@@ -323,11 +308,11 @@ function genererPDF() {
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(20);
   doc.setFont('helvetica', 'bold');
-  doc.text('Parfums by Amy', 14, 16);
+  doc.text('Parfums by Bousso', 14, 16);
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.text('Vente de parfums de qualité', 14, 24);
-  doc.text('Dakar, Sénégal', 14, 30);
+  doc.text('Touba, Sénégal', 14, 30);
 
   // Infos facture
   doc.setTextColor(50, 50, 50);
@@ -380,7 +365,7 @@ function genererPDF() {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.setTextColor(150, 150, 150);
-  doc.text('Merci pour votre achat ! — Parfums by Amy', 14, 280);
+  doc.text('Merci pour votre achat ! — Parfums by Bousso', 14, 280);
 
   // Sauvegarder dans l'historique
   const factures = getFactures();
@@ -425,3 +410,15 @@ function afficherHistoriqueFactures() {
     </div>
   `).join('');
 }
+
+// ========== INIT ==========
+
+document.addEventListener('DOMContentLoaded', () => {
+  afficherProduits();
+  afficherDernieresVentes();
+  afficherHistoriqueVentes();
+  afficherHistoriqueFactures();
+  calculerStats();
+  chargerSelectProduits();
+  chargerSelectFacture();
+});
