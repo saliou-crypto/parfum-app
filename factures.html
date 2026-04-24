@@ -11,59 +11,52 @@
 
   <!-- HEADER -->
   <div class="header">
-    <p class="bonjour">Générer une facture</p>
-    <h1 class="titre">Factures</h1>
+    <p class="bonjour">Répertoire des factures</p>
+    <h1 class="titre">Mes Factures</h1>
   </div>
 
-  <!-- FORMULAIRE FACTURE -->
+  <!-- LISTE FACTURES -->
   <div class="section">
-    <p class="section-titre">Nouvelle facture</p>
-    <div class="formulaire">
-      <input type="text" id="facture-client" placeholder="Nom du client" />
-      <input type="text" id="facture-telephone" placeholder="Téléphone (optionnel)" />
-      <select id="facture-produit">
-        <option value="">-- Choisir un parfum --</option>
-      </select>
-      <input type="number" id="facture-quantite" placeholder="Quantité" min="1" />
-      <button onclick="ajouterLigneFacture()">+ Ajouter une ligne</button>
-    </div>
-  </div>
-
-  <!-- APERCU FACTURE -->
-  <div class="section" id="apercu-section" style="display:none">
-    <p class="section-titre">Aperçu</p>
-    <div class="facture-apercu">
-      <div class="facture-entete">
-        <h2>Parfums by Amy</h2>
-        <p id="facture-numero"></p>
-        <p id="facture-date"></p>
-      </div>
-      <p class="facture-client-nom" id="apercu-client"></p>
-      <table class="facture-table">
-        <thead>
-          <tr>
-            <th>Produit</th>
-            <th>Qté</th>
-            <th>Prix</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody id="facture-lignes"></tbody>
-      </table>
-      <div class="facture-total">
-        <span>Total</span>
-        <span id="facture-total-montant">0 F CFA</span>
-      </div>
-      <button class="btn-pdf" onclick="genererPDF()">📄 Télécharger PDF</button>
-      <button class="btn-reset" onclick="reinitialiserFacture()">🔄 Nouvelle facture</button>
-    </div>
-  </div>
-
-  <!-- HISTORIQUE FACTURES -->
-  <div class="section">
-    <p class="section-titre">Historique</p>
-    <div id="historique-factures">
+    <p class="section-titre">Toutes les factures</p>
+    <div id="liste-factures">
       <p class="vide">Aucune facture générée</p>
+    </div>
+  </div>
+
+  <!-- MODAL APERCU -->
+  <div id="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; justify-content:center; align-items:flex-end;">
+    <div style="background:white; width:100%; max-width:420px; border-radius:20px 20px 0 0; padding:20px; max-height:85vh; overflow-y:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="font-size:16px; font-weight:600; color:#111;">Aperçu facture</h3>
+        <button onclick="fermerModal()" style="background:none; border:none; font-size:22px; cursor:pointer; color:#999;">✕</button>
+      </div>
+
+      <div class="facture-apercu">
+        <div class="facture-entete">
+          <h2>Parfums by Bousso</h2>
+          <p id="modal-numero"></p>
+          <p id="modal-date"></p>
+        </div>
+        <p class="facture-client-nom" id="modal-client"></p>
+        <table class="facture-table">
+          <thead>
+            <tr>
+              <th>Produit</th>
+              <th>Qté</th>
+              <th>Prix</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody id="modal-lignes"></tbody>
+        </table>
+        <div class="facture-total">
+          <span>Total</span>
+          <span id="modal-total">0 F CFA</span>
+        </div>
+      </div>
+
+      <button class="btn-pdf" onclick="telechargerDepuisModal()">📄 Télécharger PDF</button>
+      <button class="btn-reset" onclick="fermerModal()">Fermer</button>
     </div>
   </div>
 

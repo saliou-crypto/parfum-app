@@ -158,12 +158,15 @@ function afficherHistoriqueVentes() {
   }
 
   liste.innerHTML = ventes.map(v => `
-    <div class="vente-item">
+    <div class="vente-item" onclick="genererPDFDepuisVente(${v.id})" style="cursor:pointer;">
       <div class="vente-info">
         <p>${v.produitNom} x${v.quantite}</p>
         <p>${v.client} · ${formaterDate(v.date)}</p>
       </div>
-      <span class="vente-montant">+${v.total.toLocaleString()} F</span>
+      <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+        <span class="vente-montant">+${v.total.toLocaleString()} F</span>
+        <span style="font-size:10px; color:#c026d3;">🧾 Facture</span>
+      </div>
     </div>
   `).join('');
 }
@@ -390,8 +393,8 @@ function reinitialiserFacture() {
   chargerSelectFacture();
 }
 
-function afficherHistoriqueFactures() {
-  const liste = document.getElementById('historique-factures');
+function afficherListeFactures() {
+  const liste = document.getElementById('liste-factures');
   if (!liste) return;
 
   const factures = getFactures();
@@ -401,14 +404,21 @@ function afficherHistoriqueFactures() {
   }
 
   liste.innerHTML = factures.map(f => `
-    <div class="vente-item">
+    <div class="vente-item" onclick="ouvrirFacture(${f.venteId})" style="cursor:pointer;">
       <div class="vente-info">
-        <p>${f.numero}</p>
+        <p>${f.numero} — ${f.produitNom}</p>
         <p>${f.client} · ${formaterDate(f.date)}</p>
       </div>
-      <span class="vente-montant">${f.total.toLocaleString()} F</span>
+      <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+        <span class="vente-montant">${f.total.toLocaleString()} F</span>
+        <span style="font-size:10px; color:#c026d3;">👁 Voir</span>
+      </div>
     </div>
   `).join('');
+}
+
+function ouvrirFacture(venteId) {
+  genererPDFDepuisVente(venteId);
 }
 
 // ========== INIT ==========
@@ -417,8 +427,122 @@ document.addEventListener('DOMContentLoaded', () => {
   afficherProduits();
   afficherDernieresVentes();
   afficherHistoriqueVentes();
-  afficherHistoriqueFactures();
+  afficherListeFactures();
   calculerStats();
   chargerSelectProduits();
-  chargerSelectFacture();
 });
+let factureEnCours = null;
+
+function genererPDFDepuisVente(id) {
+  const vente = getVentes().find(v => v.id === id);
+  if (!vente) return;
+
+  const numero = 'FAC-' + vente.id.toString().slice(-6);
+  const date = new Date(vente.date).toLocaleDateString('fr-FR');
+
+  // Sauvegarder dans l'historique si pas déjà présent
+  const factures = getFactures();
+  const existe = factures.find(f => f.venteId === vente.id);
+  if (!existe) {
+    factures.unshift({
+      id: Date.now(),
+      venteId: vente.id,
+      numero,
+      client: vente.client,
+      produitNom: vente.produitNom,
+      prix: vente.prix,
+      quantite: vente.quantite,
+      total: vente.total,
+      date: vente.date
+    });
+    saveFactures(factures);
+  }
+
+  // Stocker pour téléchargement éventuel
+  factureEnCours = { vente, numero, date };
+
+  // Afficher le modal
+  document.getElementById('modal-numero').textContent = 'N° ' + numero;
+  document.getElementById('modal-date').textContent = 'Date : ' + date;
+  document.getElementById('modal-client').textContent = 'Client : ' + vente.client;
+  document.getElementById('modal-lignes').innerHTML = `
+    <tr>
+      <td>${vente.produitNom}</td>
+      <td>${vente.quantite}</td>
+      <td>${vente.prix.toLocaleString()} F</td>
+      <td>${vente.total.toLocaleString()} F</td>
+    </tr>
+  `;
+  document.getElementById('modal-total').textContent = vente.total.toLocaleString() + ' F CFA';
+
+  const overlay = document.getElementById('modal-overlay');
+  overlay.style.display = 'flex';
+
+  afficherListeFactures();
+}
+
+function fermerModal() {
+  document.getElementById('modal-overlay').style.display = 'none';
+  factureEnCours = null;
+}
+
+function telechargerDepuisModal() {
+  if (!factureEnCours) return;
+  const { vente, numero, date } = factureEnCours;
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  doc.setFillColor(192, 38, 211);
+  doc.rect(0, 0, 210, 35, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(20);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Parfums by Bousso', 14, 16);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Vente de parfums de qualité', 14, 24);
+  doc.text('Touba, Sénégal', 14, 30);
+
+  doc.setTextColor(50, 50, 50);
+  doc.setFontSize(11);
+  doc.text('FACTURE', 14, 48);
+  doc.setFontSize(10);
+  doc.text('N° : ' + numero, 14, 56);
+  doc.text('Date : ' + date, 14, 63);
+  doc.text('Client : ' + vente.client, 14, 70);
+
+  doc.setDrawColor(192, 38, 211);
+  doc.setLineWidth(0.5);
+  doc.line(14, 75, 196, 75);
+
+  doc.setFillColor(245, 245, 245);
+  doc.rect(14, 78, 182, 8, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.text('Produit', 16, 84);
+  doc.text('Qté', 110, 84);
+  doc.text('Prix unitaire', 130, 84);
+  doc.text('Total', 172, 84);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFillColor(252, 232, 255);
+  doc.rect(14, 91, 182, 8, 'F');
+  doc.text(vente.produitNom, 16, 97);
+  doc.text(String(vente.quantite), 112, 97);
+  doc.text(vente.prix.toLocaleString() + ' F', 130, 97);
+  doc.text(vente.total.toLocaleString() + ' F', 172, 97);
+
+  doc.setLineWidth(0.5);
+  doc.line(14, 105, 196, 105);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.text('TOTAL : ' + vente.total.toLocaleString() + ' F CFA', 130, 113);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(150, 150, 150);
+  doc.text('Merci pour votre achat ! — Parfums by Bousso', 14, 280);
+
+  doc.save('facture-' + numero + '.pdf');
+}
