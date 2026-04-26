@@ -303,7 +303,7 @@ function validerVente() {
   });
   saveVentes(ventes);
 
-  alert('Vente enregistrée ! ✅');
+  afficherMessage('Vente enregistrée ! ✅');
 
   panier = [];
   document.getElementById('client-vente').value = '';
@@ -312,6 +312,7 @@ function validerVente() {
   chargerSelectProduits();
   afficherDernieresVentes();
   calculerStats();
+  afficherAlertes();
 }
 
 function supprimerVente(id) {
@@ -455,7 +456,6 @@ function genererPDFDepuisVente(id) {
   document.getElementById('modal-total').textContent = vente.total.toLocaleString() + ' F CFA';
 
   document.getElementById('modal-overlay').style.display = 'flex';
-  afficherListeFactures();
 }
 
 function fermerModal() {
@@ -724,6 +724,25 @@ function afficherAlertes() {
       <a href="produits.html" style="font-size:11px; color:#c026d3; text-decoration:none;">Réappro →</a>
     </div>
   `).join('');
+}
+function afficherMessage(texte) {
+  const msg = document.createElement('div');
+  msg.textContent = texte;
+  msg.style.cssText = `
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #16a34a;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 9999;
+  `;
+  document.body.appendChild(msg);
+  setTimeout(() => msg.remove(), 2500);
 }
 
 // ========== INIT ==========
