@@ -411,7 +411,6 @@ function calculerStats() {
 // ========== FACTURES ==========
 
 let factureEnCours = null;
-
 function genererPDFDepuisVente(id) {
   const vente = getVentes().find(v => v.id === id);
   if (!vente) return;
@@ -425,27 +424,23 @@ function genererPDFDepuisVente(id) {
     total: vente.total
   }];
 
-  // Sauvegarder en arrière plan sans bloquer
-  setTimeout(() => {
-    const factures = getFactures();
-    const existe = factures.find(f => f.venteId === vente.id);
-    if (!existe) {
-      factures.unshift({
-        id: Date.now(),
-        venteId: vente.id,
-        numero,
-        client: vente.client,
-        produitNom: articles.map(a => a.produitNom).join(', '),
-        total: vente.total,
-        date: vente.date
-      });
-      saveFactures(factures);
-    }
-  }, 0);
+  const factures = getFactures();
+  const existe = factures.find(f => f.venteId === vente.id);
+  if (!existe) {
+    factures.unshift({
+      id: Date.now(),
+      venteId: vente.id,
+      numero,
+      client: vente.client,
+      produitNom: articles.map(a => a.produitNom).join(', '),
+      total: vente.total,
+      date: vente.date
+    });
+    saveFactures(factures);
+  }
 
   factureEnCours = { vente, articles, numero, date };
 
-  // Afficher le modal immédiatement
   document.getElementById('modal-numero').textContent = 'N° ' + numero;
   document.getElementById('modal-date').textContent = 'Date : ' + date;
   document.getElementById('modal-client').textContent = 'Client : ' + vente.client;
@@ -461,7 +456,6 @@ function genererPDFDepuisVente(id) {
 
   document.getElementById('modal-overlay').style.display = 'flex';
 }
-
 function fermerModal() {
   document.getElementById('modal-overlay').style.display = 'none';
   factureEnCours = null;
