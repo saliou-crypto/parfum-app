@@ -351,7 +351,10 @@ function afficherHistoriqueVentes() {
   liste.innerHTML = ventes.map(v => `
     <div class="vente-item">
       <div class="vente-info" onclick="genererPDFDepuisVente(${v.id})" style="cursor:pointer; flex:1;">
-        <p>${v.articles ? v.articles.map(a => a.produitNom).join(', ') : v.produitNom}</p>
+        <p>${v.articles
+          ? v.articles.map(a => `${a.produitNom} x${a.quantite}`).join(', ')
+          : `${v.produitNom} x${v.quantite}`
+        }</p>
         <p>${v.client} · ${formaterDate(v.date)}</p>
       </div>
       <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
@@ -361,7 +364,6 @@ function afficherHistoriqueVentes() {
     </div>
   `).join('');
 }
-
 // ========== ACCUEIL ==========
 
 function afficherDernieresVentes() {
@@ -377,14 +379,16 @@ function afficherDernieresVentes() {
   liste.innerHTML = `<div class="ventes-liste">${ventes.map(v => `
     <div class="vente-item">
       <div class="vente-info">
-        <p>${v.articles ? v.articles.map(a => a.produitNom).join(', ') : v.produitNom}</p>
+        <p>${v.articles
+          ? v.articles.map(a => `${a.produitNom} x${a.quantite}`).join(', ')
+          : `${v.produitNom} x${v.quantite}`
+        }</p>
         <p>${v.client} · ${formaterDate(v.date)}</p>
       </div>
       <span class="vente-montant">+${v.total.toLocaleString()} F</span>
     </div>
   `).join('')}</div>`;
 }
-
 function calculerStats() {
   const venteJourEl = document.getElementById('ventes-jour');
   const venteMoisEl = document.getElementById('ventes-mois');
