@@ -32,6 +32,25 @@ function formaterDate(timestamp) {
   });
 }
 
+// ========== PHOTOS ==========
+
+let photoEnCours = null;
+
+function previewPhoto(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    photoEnCours = e.target.result;
+    document.getElementById('photo-preview-zone').innerHTML = `
+      <img src="${photoEnCours}" class="photo-preview-img" />
+      <p style="font-size:11px; color:#c026d3; margin-top:6px;">Appuie pour changer</p>
+    `;
+  };
+  reader.readAsDataURL(file);
+}
+
 // ========== PRODUITS ==========
 
 function ajouterProduit() {
@@ -45,12 +64,23 @@ function ajouterProduit() {
   }
 
   const produits = getProduits();
-  produits.push({ id: Date.now(), nom, prix, stock });
+  produits.push({
+    id: Date.now(),
+    nom,
+    prix,
+    stock,
+    photo: photoEnCours || null
+  });
   saveProduits(produits);
 
   document.getElementById('nom-produit').value = '';
   document.getElementById('prix-produit').value = '';
   document.getElementById('stock-produit').value = '';
+  document.getElementById('photo-preview-zone').innerHTML = `
+    <span style="font-size:28px;">📷</span>
+    <p style="font-size:13px; color:#999; margin-top:4px;">Ajouter une photo</p>
+  `;
+  photoEnCours = null;
 
   afficherProduits();
 }
@@ -70,6 +100,14 @@ function ouvrirModification(id) {
   document.getElementById('prix-produit').value = p.prix;
   document.getElementById('stock-produit').value = p.stock;
 
+  if (p.photo) {
+    photoEnCours = p.photo;
+    document.getElementById('photo-preview-zone').innerHTML = `
+      <img src="${p.photo}" class="photo-preview-img" />
+      <p style="font-size:11px; color:#c026d3; margin-top:6px;">Appuie pour changer</p>
+    `;
+  }
+
   const btn = document.querySelector('.formulaire button');
   btn.textContent = 'Modifier le produit';
   btn.onclick = () => enregistrerModification(id);
@@ -88,7 +126,10 @@ function enregistrerModification(id) {
   }
 
   let produits = getProduits();
-  produits = produits.map(p => p.id === id ? { ...p, nom, prix, stock } : p);
+  produits = produits.map(p => p.id === id ? {
+    ...p, nom, prix, stock,
+    photo: photoEnCours || p.photo
+  } : p);
   saveProduits(produits);
 
   const btn = document.querySelector('.formulaire button');
@@ -98,6 +139,11 @@ function enregistrerModification(id) {
   document.getElementById('nom-produit').value = '';
   document.getElementById('prix-produit').value = '';
   document.getElementById('stock-produit').value = '';
+  document.getElementById('photo-preview-zone').innerHTML = `
+    <span style="font-size:28px;">📷</span>
+    <p style="font-size:13px; color:#999; margin-top:4px;">Ajouter une photo</p>
+  `;
+  photoEnCours = null;
 
   afficherProduits();
 }
@@ -114,7 +160,10 @@ function afficherProduits() {
 
   liste.innerHTML = produits.map(p => `
     <div class="produit-item">
-      <div class="produit-icon">🌸</div>
+      ${p.photo
+        ? `<img src="${p.photo}" class="produit-photo" />`
+        : `<div class="produit-icon">🌸</div>`
+      }
       <div class="produit-info">
         <p>${p.nom}</p>
         <p>${p.prix.toLocaleString()} F CFA · Stock: ${p.stock}</p>
@@ -510,6 +559,130 @@ function ouvrirFacture(venteId) {
   genererPDFDepuisVente(venteId);
 }
 
+// ========== RAPPORT ==========
+
+function getNomMois(date) {
+  return date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+}
+
+function chargerRapport() {
+  const ventes = getVentes();
+  const now = new Date();
+
+  const moisActuel = ventes.filter(v => {
+    const d = new Date(v.date);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+
+  const moisPrecedentDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const moisPrecedent = ventes.filter(v => {
+    const d = new Date(v.date);
+    return d.getMonth() === moisPrecedentDate.getMonth() &&
+           d.getFullYear() === moisPrecedentDate.getFullYear();
+  });
+
+  const totalActuel = moisActuel.reduce((s, v) => s + v.total, 0);
+  const totalPrecedent = moisPrecedent.reduce((s, v) => s + v.total, 0);
+
+  const labelActuel = document.getElementById('label-mois-actuel');
+  const labelPrecedent = document.getElementById('label-mois-precedent');
+  const totalActuelEl = document.getElementById('total-mois-actuel');
+  const totalPrecedentEl = document.getElementById('total-mois-precedent');
+
+  if (!labelActuel) return;
+
+  labelActuel.textContent = getNomMois(now);
+  labelPrecedent.textContent = getNomMois(moisPrecedentDate);
+  totalActuelEl.textContent = totalActuel.toLocaleString() + ' F';
+  totalPrecedentEl.textContent = totalPrecedent.toLocaleString() + ' F';
+
+  const msg = document.getElementById('comparaison-message');
+  if (msg) {
+    if (totalPrecedent === 0) {
+      msg.textContent = '';
+    } else if (totalActuel > totalPrecedent) {
+      const diff = Math.round(((totalActuel - totalPrecedent) / totalPrecedent) * 100);
+      msg.innerHTML = `<span style="color:#16a34a;">📈 +${diff}% par rapport au mois dernier</span>`;
+    } else if (totalActuel < totalPrecedent) {
+      const diff = Math.round(((totalPrecedent - totalActuel) / totalPrecedent) * 100);
+      msg.innerHTML = `<span style="color:#dc2626;">📉 -${diff}% par rapport au mois dernier</span>`;
+    } else {
+      msg.innerHTML = `<span style="color:#64748b;">= Même niveau que le mois dernier</span>`;
+    }
+  }
+
+  const parMois = {};
+  ventes.forEach(v => {
+    const d = new Date(v.date);
+    const cle = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const label = getNomMois(d);
+    if (!parMois[cle]) parMois[cle] = { label, total: 0, count: 0 };
+    parMois[cle].total += v.total;
+    parMois[cle].count++;
+  });
+
+  const moisTries = Object.keys(parMois).sort().reverse();
+  const historiqueDiv = document.getElementById('historique-mois');
+
+  if (historiqueDiv) {
+    if (moisTries.length === 0) {
+      historiqueDiv.innerHTML = '<p class="vide">Aucune donnée</p>';
+    } else {
+      const maxTotal = Math.max(...moisTries.map(k => parMois[k].total));
+      historiqueDiv.innerHTML = moisTries.map(k => {
+        const m = parMois[k];
+        const pct = Math.round((m.total / maxTotal) * 100);
+        return `
+          <div class="mois-item">
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+              <span style="font-size:13px; font-weight:500; text-transform:capitalize;">${m.label}</span>
+              <span style="font-size:13px; font-weight:600; color:#c026d3;">${m.total.toLocaleString()} F</span>
+            </div>
+            <div class="barre-bg">
+              <div class="barre-fill" style="width:${pct}%;"></div>
+            </div>
+            <p style="font-size:11px; color:#999; margin-top:3px;">${m.count} vente(s)</p>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  const parProduit = {};
+  ventes.forEach(v => {
+    const articles = v.articles || [{ produitNom: v.produitNom, quantite: v.quantite, total: v.total }];
+    articles.forEach(a => {
+      if (!parProduit[a.produitNom]) parProduit[a.produitNom] = { quantite: 0, total: 0 };
+      parProduit[a.produitNom].quantite += a.quantite;
+      parProduit[a.produitNom].total += a.total;
+    });
+  });
+
+  const topProduits = Object.entries(parProduit)
+    .sort((a, b) => b[1].total - a[1].total)
+    .slice(0, 5);
+
+  const topDiv = document.getElementById('top-produits');
+  if (topDiv) {
+    if (topProduits.length === 0) {
+      topDiv.innerHTML = '<p class="vide">Aucune donnée</p>';
+    } else {
+      topDiv.innerHTML = topProduits.map(([nom, data], i) => `
+        <div class="top-item">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span class="top-rang">${i + 1}</span>
+            <div>
+              <p style="font-size:13px; font-weight:500;">${nom}</p>
+              <p style="font-size:11px; color:#999;">${data.quantite} unité(s) vendue(s)</p>
+            </div>
+          </div>
+          <span style="font-size:13px; font-weight:600; color:#c026d3;">${data.total.toLocaleString()} F</span>
+        </div>
+      `).join('');
+    }
+  }
+}
+
 // ========== INIT ==========
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -519,4 +692,5 @@ document.addEventListener('DOMContentLoaded', () => {
   afficherListeFactures();
   calculerStats();
   chargerSelectProduits();
+  chargerRapport();
 });

@@ -422,3 +422,111 @@ img {
   max-width: 100%;
   height: auto;
 }
+/* PHOTO UPLOAD */
+.photo-upload-zone {
+  border: 2px dashed #e9d5ff;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  background: #fdf4ff;
+  transition: all 0.2s;
+}
+
+.photo-upload-zone:active {
+  background: #f3e8ff;
+}
+
+.photo-preview-img {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.produit-photo {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  object-fit: cover;
+  margin-right: 4px;
+}
+/* ===== RAPPORT ===== */
+.stats-grid-rapport {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.stat-card-rapport {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  padding: 14px;
+  text-align: center;
+}
+
+.stat-label-rapport {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 6px;
+  text-transform: capitalize;
+}
+
+.stat-value-rapport {
+  font-size: 20px;
+  font-weight: 700;
+  color: #c026d3;
+}
+
+.stat-value-rapport.secondary {
+  color: #94a3b8;
+}
+
+.mois-item {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+
+.barre-bg {
+  background: #f3e8ff;
+  border-radius: 20px;
+  height: 8px;
+  width: 100%;
+}
+
+.barre-fill {
+  background: linear-gradient(90deg, #f472b6, #c026d3);
+  border-radius: 20px;
+  height: 8px;
+  transition: width 0.5s ease;
+}
+
+.top-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+
+.top-rang {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #fdf4ff;
+  color: #c026d3;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}

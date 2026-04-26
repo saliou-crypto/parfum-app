@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rapport</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#c026d3" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Bousso" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <p class="bonjour">Statistiques & Historique</p>
+    <h1 class="titre">Rapport</h1>
+  </div>
+
+  <!-- COMPARAISON MOIS -->
+  <div class="section">
+    <p class="section-titre">Ce mois vs mois précédent</p>
+    <div class="stats-grid-rapport">
+      <div class="stat-card-rapport">
+        <p class="stat-label-rapport" id="label-mois-actuel">Ce mois</p>
+        <p class="stat-value-rapport" id="total-mois-actuel">0 F</p>
+      </div>
+      <div class="stat-card-rapport">
+        <p class="stat-label-rapport" id="label-mois-precedent">Mois précédent</p>
+        <p class="stat-value-rapport secondary" id="total-mois-precedent">0 F</p>
+      </div>
+    </div>
+    <div id="comparaison-message" style="text-align:center; margin-top:10px; font-size:14px;"></div>
+  </div>
+
+  <!-- HISTORIQUE PAR MOIS -->
+  <div class="section">
+    <p class="section-titre">Historique par mois</p>
+    <div id="historique-mois">
+      <p class="vide">Aucune donnée</p>
+    </div>
+  </div>
+
+  <!-- TOP PRODUITS -->
+  <div class="section">
+    <p class="section-titre">Top produits vendus</p>
+    <div id="top-produits">
+      <p class="vide">Aucune donnée</p>
+    </div>
+  </div>
+
+  <!-- NAV BAS -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <span>🏠</span>
+      <span>Accueil</span>
+    </a>
+    <a href="produits.html" class="nav-item">
+      <span>📦</span>
+      <span>Produits</span>
+    </a>
+    <a href="ventes.html" class="nav-item">
+      <span>🛒</span>
+      <span>Ventes</span>
+    </a>
+    <a href="factures.html" class="nav-item">
+      <span>🧾</span>
+      <span>Factures</span>
+    </a>
+    <a href="rapport.html" class="nav-item active">
+      <span>📊</span>
+      <span>Rapport</span>
+    </a>
+  </nav>
+
+  <script src="js/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(() => console.log('SW enregistré ✅'))
+        .catch(err => console.log('Erreur SW:', err));
+    }
+  </script>
+</body>
+</html>
