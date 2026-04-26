@@ -425,23 +425,27 @@ function genererPDFDepuisVente(id) {
     total: vente.total
   }];
 
-  const factures = getFactures();
-  const existe = factures.find(f => f.venteId === vente.id);
-  if (!existe) {
-    factures.unshift({
-      id: Date.now(),
-      venteId: vente.id,
-      numero,
-      client: vente.client,
-      produitNom: articles.map(a => a.produitNom).join(', '),
-      total: vente.total,
-      date: vente.date
-    });
-    saveFactures(factures);
-  }
+  // Sauvegarder en arrière plan sans bloquer
+  setTimeout(() => {
+    const factures = getFactures();
+    const existe = factures.find(f => f.venteId === vente.id);
+    if (!existe) {
+      factures.unshift({
+        id: Date.now(),
+        venteId: vente.id,
+        numero,
+        client: vente.client,
+        produitNom: articles.map(a => a.produitNom).join(', '),
+        total: vente.total,
+        date: vente.date
+      });
+      saveFactures(factures);
+    }
+  }, 0);
 
   factureEnCours = { vente, articles, numero, date };
 
+  // Afficher le modal immédiatement
   document.getElementById('modal-numero').textContent = 'N° ' + numero;
   document.getElementById('modal-date').textContent = 'Date : ' + date;
   document.getElementById('modal-client').textContent = 'Client : ' + vente.client;
