@@ -530,3 +530,24 @@ img {
   justify-content: center;
   flex-shrink: 0;
 }
+/* ALERTES */
+.alerte-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+.alerte-rupture {
+  background: #fef2f2;
+  border-left: 3px solid #ef4444;
+  color: #991b1b;
+}
+
+.alerte-bas {
+  background: #fff7ed;
+  border-left: 3px solid #f97316;
+  color: #9a3412;
+}

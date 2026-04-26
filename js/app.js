@@ -682,6 +682,49 @@ function chargerRapport() {
     }
   }
 }
+function filtrerProduits() {
+  const query = document.getElementById('recherche-produit').value.trim().toLowerCase();
+  const select = document.getElementById('produit-vente');
+  const produits = getProduits();
+
+  select.innerHTML = '<option value="">-- Choisir un parfum --</option>';
+
+  const filtres = query
+    ? produits.filter(p => p.nom.toLowerCase().includes(query))
+    : produits;
+
+  filtres.forEach(p => {
+    select.innerHTML += `<option value="${p.id}">${p.nom} — ${p.prix.toLocaleString()} F CFA (stock: ${p.stock})</option>`;
+  });
+}
+
+function afficherAlertes() {
+  const sectionAlertes = document.getElementById('section-alertes');
+  const divAlertes = document.getElementById('alertes-stock');
+  if (!sectionAlertes || !divAlertes) return;
+
+  const produits = getProduits();
+  const stockMin = 3; // alerte si stock <= 3
+  const alertes = produits.filter(p => p.stock <= stockMin);
+
+  if (alertes.length === 0) {
+    sectionAlertes.style.display = 'none';
+    return;
+  }
+
+  sectionAlertes.style.display = 'block';
+  divAlertes.innerHTML = alertes.map(p => `
+    <div class="alerte-item ${p.stock === 0 ? 'alerte-rupture' : 'alerte-bas'}">
+      <div>
+        <p style="font-size:13px; font-weight:500;">${p.nom}</p>
+        <p style="font-size:11px; margin-top:2px;">
+          ${p.stock === 0 ? 'Rupture de stock !' : `Plus que ${p.stock} unité(s) !`}
+        </p>
+      </div>
+      <a href="produits.html" style="font-size:11px; color:#c026d3; text-decoration:none;">Réappro →</a>
+    </div>
+  `).join('');
+}
 
 // ========== INIT ==========
 
@@ -693,4 +736,5 @@ document.addEventListener('DOMContentLoaded', () => {
   calculerStats();
   chargerSelectProduits();
   chargerRapport();
+  afficherAlertes();
 });

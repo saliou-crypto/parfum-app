@@ -30,17 +30,17 @@
   </div>
 
   <!-- PANIER -->
-  <div class="section">
-    <p class="section-titre">Ajouter des produits</p>
-    <div class="formulaire">
-      <select id="produit-vente">
-        <option value="">-- Choisir un parfum --</option>
-      </select>
-      <input type="number" id="quantite-vente" placeholder="Quantité" min="1" />
-      <button onclick="ajouterAuPanier()">+ Ajouter au panier</button>
-    </div>
+<div class="section">
+  <p class="section-titre">Ajouter des produits</p>
+  <div class="formulaire">
+    <input type="text" id="recherche-produit" placeholder="🔍 Rechercher un parfum..." oninput="filtrerProduits()" />
+    <select id="produit-vente">
+      <option value="">-- Choisir un parfum --</option>
+    </select>
+    <input type="number" id="quantite-vente" placeholder="Quantité" min="1" />
+    <button onclick="ajouterAuPanier()">+ Ajouter au panier</button>
   </div>
-
+</div>
   <!-- APERCU PANIER -->
   <div class="section" id="panier-section" style="display:none;">
     <p class="section-titre">Panier</p>
